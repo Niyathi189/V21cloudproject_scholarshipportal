@@ -191,6 +191,22 @@ app.get("/api/student/applications/:student_id", async (req, res) => {
   }
 });
 
+app.get("/api/test-db", async (req, res) => {
+  try {
+    const pool = await sql.connect(dbConfig);
+    const result = await pool.request().query("SELECT 1 AS test");
+    res.status(200).json({ 
+      message: "✅ Database connected successfully!",
+      result: result.recordset 
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      message: "❌ Database connection failed",
+      error: err.message 
+    });
+  }
+});
+
 // ---------------- START SERVER ----------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
