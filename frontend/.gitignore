@@ -1,0 +1,23 @@
+# IDE files
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Build and dist folders
+build/
+dist/
+
+# Python cache
+__pycache__/
+
+# Node.js dependencies
+node_modules/
+backend/node_modules/
+frontend/cloud-front/node_modules/
+
+# Environment files
+.env
+backend/.env
+frontend/.env

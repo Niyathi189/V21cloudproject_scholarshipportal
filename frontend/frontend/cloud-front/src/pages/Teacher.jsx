@@ -51,7 +51,7 @@ export default function Teacher() {
 
     setLoading(true);
     try {
-      const res = await fetch("https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/teacher/createScholarship", {
+      const res = await fetch("http://localhost:5000/api/teacher/createScholarship", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -85,7 +85,7 @@ export default function Teacher() {
     const id = Number(teacherId);
     setLoading(true);
     try {
-      const res = await fetch(`https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/teacher/scholarships/${encodeURIComponent(id)}`);
+      const res = await fetch(`http://localhost:5000/api/teacher/scholarships/${encodeURIComponent(id)}`);
       if (!res.ok) {
         const err = await safeJson(res);
         return alert(err.message || "Failed to fetch scholarships");
@@ -107,7 +107,7 @@ export default function Teacher() {
     setApplications([]);
     setLoading(true);
     try {
-      const res = await fetch(`https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/teacher/applications/${sid}`);
+      const res = await fetch(`http://localhost:5000/api/teacher/applications/${sid}`);
       if (!res.ok) {
         const err = await safeJson(res);
         return alert(err.message || "Failed to fetch applications");
@@ -124,7 +124,7 @@ export default function Teacher() {
   const updateApplicationStatus = async (application_id, status) => {
     if (!application_id) return;
     try {
-      const res = await fetch("https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/teacher/updateApplicationStatus", {
+      const res = await fetch("http://localhost:5000/api/teacher/updateApplicationStatus", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ application_id, status }),

@@ -18,7 +18,7 @@ export default function Login() {
     if (!username || !password) return alert("Enter username and password");
 
     try {
-      const res = await fetch("https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/login", {
+      const res = await fetch("http://localhost:5000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -45,7 +45,7 @@ export default function Login() {
     if (!suUsername || !suPassword) return alert("Enter username and password");
 
     try {
-      const res = await fetch("https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/register", {
+      const res = await fetch("http://localhost:5000/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: suUsername, password: suPassword, role: suRole }),

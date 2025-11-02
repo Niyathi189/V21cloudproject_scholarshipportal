@@ -48,7 +48,7 @@ export default function Student() {
   const fetchAvailable = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/student/scholarships");
+      const res = await fetch("http://localhost:5000/api/student/scholarships");
       if (!res.ok) {
         const err = await safeJson(res);
         return alert(err.message || "Failed to fetch scholarships");
@@ -69,7 +69,7 @@ export default function Student() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/student/applications/${encodeURIComponent(studentId)}`);
+      const res = await fetch(`http://localhost:5000/api/student/applications/${encodeURIComponent(studentId)}`);
       if (!res.ok) {
         const err = await safeJson(res);
         return alert(err.message || "Failed to fetch your applications");
@@ -129,7 +129,7 @@ export default function Student() {
         current_year: parseInt(currentYear) || null,
       };
 
-      const res = await fetch("https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/student/apply", {
+      const res = await fetch("http://localhost:5000/api/student/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
