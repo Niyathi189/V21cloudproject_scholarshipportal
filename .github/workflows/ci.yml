@@ -1,4 +1,4 @@
-name: Squalify Portal CI
+name: Squalify Portal CI/CD
 
 on:
   push:
@@ -11,22 +11,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Build Backend
         run: |
           cd backend
           npm install
           npm run build || echo "No build script"
 
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Backend to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: scholar-backend   # your Azure app service name
+          package: backend
+
   build_frontend:
     runs-on: ubuntu-latest
     needs: build_backend
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Build Frontend
         run: |
           cd frontend/cloud-front
           npm install
           npm run build
+
       - name: Upload Frontend Build Artifact
         uses: actions/upload-artifact@v4
         with:
