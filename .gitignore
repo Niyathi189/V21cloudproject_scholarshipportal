@@ -1,0 +1,10 @@
+echo ".idea/
+*.iml
+*.log
+build/
+dist/
+__pycache__/
+node_modules/
+.env" > .gitignore
+backend/node_modules
+frontend/cloud-front/node_modules

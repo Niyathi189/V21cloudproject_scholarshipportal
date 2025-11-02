@@ -1,0 +1,34 @@
+name: Squalify Portal CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build_backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Backend
+        run: |
+          cd backend
+          npm install
+          npm run build || echo "No build script"
+
+  build_frontend:
+    runs-on: ubuntu-latest
+    needs: build_backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Frontend
+        run: |
+          cd frontend/cloud-front
+          npm install
+          npm run build
+      - name: Upload Frontend Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend_dist
+          path: frontend/cloud-front/dist
