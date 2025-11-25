@@ -177,7 +177,7 @@ export default function Student() {
     setChatLoading(true);
 
     try {
-      const res = await fetch("https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/chatbot-student", {
+      const res = await fetch("http://localhost:5000/api/chatbot-student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -289,7 +289,7 @@ app.post("/api/chatbot-student", async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Create context prompt for the chatbot
     const contextPrompt = `You are a helpful Student Scholarship Form Assistant. Your role is to help students with questions about their scholarship applications and the scholarship form process.
