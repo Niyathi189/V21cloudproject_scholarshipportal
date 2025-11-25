@@ -29,6 +29,12 @@ export default function Student() {
   const [department, setDepartment] = useState("");
   const [currentYear, setCurrentYear] = useState("");
 
+  // Chatbot states
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+
   const handleLogout = () => {
     Cookies.remove("name");
     Cookies.remove("role");
@@ -156,8 +162,56 @@ export default function Student() {
   };
   const formatDate = (d) => (d ? new Date(d).toLocaleDateString() : "-");
 
+  // Chatbot functions
+  const sendChatMessage = async (e) => {
+    e?.preventDefault();
+    if (!chatInput.trim() || !studentId) return;
+    if (chatLoading) return;
+
+    const userQuestion = chatInput.trim();
+    setChatInput("");
+    
+    // Add user message to chat
+    const userMessage = { role: "user", content: userQuestion, timestamp: new Date() };
+    setChatMessages((prev) => [...prev, userMessage]);
+    setChatLoading(true);
+
+    try {
+      const res = await fetch("https://scholar-backend-hba2dpdme8dfckb0.southeastasia-01.azurewebsites.net/api/chatbot-student", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          student_id: studentId,
+          question: userQuestion,
+        }),
+      });
+
+      const data = await safeJson(res);
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to get response");
+      }
+
+      // Add bot response to chat
+      const botMessage = {
+        role: "assistant",
+        content: data.answer || "I'm sorry, I couldn't process your question.",
+        timestamp: new Date(),
+      };
+      setChatMessages((prev) => [...prev, botMessage]);
+    } catch (err) {
+      const errorMessage = {
+        role: "assistant",
+        content: `Error: ${err.message || "Failed to connect to chatbot. Please try again."}`,
+        timestamp: new Date(),
+      };
+      setChatMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen bg-gray-100 flex relative">
       {/* LEFT SIDEBAR */}
       <aside className="w-72 bg-white shadow-lg border-r flex-shrink-0">
         <div className="px-6 py-6 border-b">
@@ -191,6 +245,17 @@ export default function Student() {
                 <div className="text-xs text-gray-500">Pending / processed</div>
               </div>
             </button>
+
+            <button
+              onClick={() => setShowChatbot(!showChatbot)}
+              className={`w-full text-left px-4 py-3 rounded-lg transition flex items-center gap-3 ${showChatbot ? "bg-cyan-50 border border-cyan-200 text-cyan-700" : "hover:bg-gray-50"}`}
+            >
+              <span className="text-lg">💬</span>
+              <div>
+                <div className="font-medium">Chatbot Helper</div>
+                <div className="text-xs text-gray-500">Ask questions about scholarships</div>
+              </div>
+            </button>
           </nav>
 
           <div className="mt-6">
@@ -210,7 +275,16 @@ export default function Student() {
       <main className="flex-1 p-8">
         <header className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold text-gray-800">{view === "available" ? "Available Scholarships" : "Your Applications"}</h1>
-          <div className="text-sm text-gray-600">{loading ? "Loading..." : `${view === "available" ? scholarships.length : pendingApps.length} items`}</div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-600">{loading ? "Loading..." : `${view === "available" ? scholarships.length : pendingApps.length} items`}</div>
+            <button
+              onClick={() => setShowChatbot(!showChatbot)}
+              className="px-4 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-700 flex items-center gap-2 transition"
+            >
+              <span>💬</span>
+              <span>Chatbot Helper</span>
+            </button>
+          </div>
         </header>
 
         {view === "available" && (
@@ -320,6 +394,106 @@ export default function Student() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* CHATBOT SIDEBAR */}
+      <div
+        className={`fixed right-0 top-0 h-full w-96 bg-white shadow-2xl border-l z-50 transition-transform duration-300 ease-in-out ${
+          showChatbot ? "translate-x-0" : "translate-x-full"
+        } flex flex-col`}
+      >
+        {/* Chatbot Header */}
+        <div className="px-6 py-4 border-b bg-cyan-50 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-cyan-700">Scholarship Helper</h3>
+            <p className="text-xs text-gray-600">Ask me anything about your applications</p>
+          </div>
+          <button
+            onClick={() => setShowChatbot(false)}
+            className="text-gray-500 hover:text-gray-700 text-xl"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Chat Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {chatMessages.length === 0 && (
+            <div className="text-center text-gray-500 mt-8">
+              <div className="text-4xl mb-2">🤖</div>
+              <p className="text-sm">Hello! I'm your Scholarship Form Helper.</p>
+              <p className="text-xs mt-2">Ask me about your applications, requirements, or any scholarship-related questions!</p>
+            </div>
+          )}
+          {chatMessages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                  msg.role === "user"
+                    ? "bg-cyan-600 text-white"
+                    : "bg-gray-100 text-gray-800"
+                }`}
+              >
+                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                <p className="text-xs mt-1 opacity-70">
+                  {new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            </div>
+          ))}
+          {chatLoading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 rounded-lg px-4 py-2">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Chat Input */}
+        <div className="border-t p-4">
+          <form onSubmit={sendChatMessage} className="flex gap-2">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="Ask a question..."
+              className="flex-1 p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              disabled={chatLoading || !studentId}
+            />
+            <button
+              type="submit"
+              disabled={chatLoading || !studentId || !chatInput.trim()}
+              className="px-4 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+            >
+              {chatLoading ? "..." : "Send"}
+            </button>
+          </form>
+          {!studentId && (
+            <p className="text-xs text-red-500 mt-2">Please log in to use the chatbot</p>
+          )}
+        </div>
+      </div>
+
+      {/* Floating Chatbot Button */}
+      {!showChatbot && (
+        <button
+          onClick={() => setShowChatbot(true)}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-cyan-600 text-white rounded-full shadow-lg hover:bg-cyan-700 transition-all hover:scale-110 flex items-center justify-center text-2xl z-40"
+          title="Open Chatbot Helper"
+        >
+          💬
+        </button>
       )}
     </div>
   );
